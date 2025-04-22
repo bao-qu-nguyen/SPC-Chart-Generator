@@ -1,3 +1,6 @@
+using System.Xml.Linq;
+using System.Diagnostics;
+
 namespace SPC_Chart_Generator
 {
     public partial class SPCChart : Form
@@ -6,10 +9,20 @@ namespace SPC_Chart_Generator
         public SPCChart()
         {
             InitializeComponent();
-            List<string> header = new List<string> {"id", "col1", "col2", "col3", "col4","col5" };
+            List<string> header = new List<string> { "id", "col1", "col2", "col3", "col4", "col5" };
             var spc = new MakeSPC();
             UserData = GenerateUserData();
-            int result = spc.InitializeSPC(header, UserData);
+            var result = spc.InitializeSPC(header, UserData);
+            foreach (var kvp in result)
+            {
+                string key = kvp.Key;
+                List<float> floats = kvp.Value.Item1;
+                List<int> ints = kvp.Value.Item2;
+
+                Debug.WriteLine($"Key: {key}");
+                Debug.WriteLine($"  Floats: {string.Join(", ", floats)}");
+                Debug.WriteLine($"  Ints: {string.Join(", ", ints)}");
+            }
         }
 
         public static List<List<float>> GenerateUserData(int rowCount = 30, int columnCount = 5)
@@ -48,5 +61,7 @@ namespace SPC_Chart_Generator
 
             return userData;
         }
+
+
     }
 }

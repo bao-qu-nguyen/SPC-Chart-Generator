@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.Data.Analysis;
 
 namespace SPC_Chart_Generator
@@ -12,16 +13,29 @@ namespace SPC_Chart_Generator
         private List<List<float>>? UserData { get; set; }
         private List<string>? ColumnNames { get; set; }
         public Dictionary<string,Dictionary<string,float>>? StatsData;
-        public int InitializeSPC(List<string>HeaderData,List<List<float>> InputData) { 
+        private Dictionary<string, Tuple<List<float>, List<int>>> ReturnDictionary = new Dictionary<string, Tuple<List<float>, List<int>>>();
+        public Dictionary<string, Tuple<List<float>, List<int>>> InitializeSPC(List<string>HeaderData,List<List<float>> InputData) 
+        { 
+            /*
+             * Return structure will be a dictionary Key: Column Name, Value: list of value and list of color
+             */
             UserData = InputData;
             ColumnNames = HeaderData;
             GetColumnStatistic();
-            List<float> column1 = UserData
-                    .Where(row => row.Count > 1)
-                    .Select(row => row[1])
-                    .ToList();
-            GetSPCColors(StatsData[ColumnNames[1]], column1);
-            return 0;
+            for (int i = 0; i < ColumnNames.Count -1; i++)
+            {
+                var column = ColumnNames[i];
+                List<float> SingleColumnData = new List<float>();
+                for (int j = 0; j < UserData.Count -1; j++)
+                {
+                    SingleColumnData.Add(UserData[j][i]);
+                    
+                }
+                var ColorList = GetSPCColors(StatsData[ColumnNames[i]], SingleColumnData);
+                ReturnDictionary[ColumnNames[i]] = new Tuple<List<float>, List<int>>(SingleColumnData,ColorList);
+            }
+
+            return ReturnDictionary;
         }
         private int GetColumnStatistic() {
             float ColumnCount = UserData[0].Count;
@@ -63,19 +77,6 @@ namespace SPC_Chart_Generator
                     StatsData[ColumnNames[i]]["Min"] = min;
                 }
             }
-            //foreach (var columnEntry in StatsData)
-            //{
-            //    string columnName = columnEntry.Key;
-            //    System.Diagnostics.Debug.WriteLine($"Column: {columnName}");
-
-            //    Dictionary<string, float> stats = columnEntry.Value;
-            //    foreach (var stat in stats)
-            //    {
-            //        System.Diagnostics.Debug.WriteLine($"  {stat.Key}: {stat.Value}");
-            //    }
-
-            //    System.Diagnostics.Debug.WriteLine(""); // blank line between columns
-            //}
             return 0;
         }
 
@@ -95,7 +96,7 @@ namespace SPC_Chart_Generator
             for (int i = 0; i < ColumnData.Count; i++)
             {
                 int count = 0;
-                //Rule 1: 
+                ////Rule 1: 
                 if (ColumnData[i] < zone3_lower || ColumnData[i] > zone3_upper || ColumnData[i] > UCL || ColumnData[i] < LCL)
                 {
                     ColorList.Add(1);
@@ -109,21 +110,17 @@ namespace SPC_Chart_Generator
                     if (ColumnData[i + 2] < zone2_lower || ColumnData[i + 2] > zone2_upper) count++;
                     if (count <= 2)
                     {
-                        if ((ColumnData[i] >= mean && ColumnData[i + 1] >= mean && ColumnData[i + 2] >= mean) ||
-                            (ColumnData[i] <= mean && ColumnData[i + 1] <= mean && ColumnData[i + 2] <= mean))
+
+                        for (int k = 0; k < 2; k++)
                         {
-                            for (int k = 0; k < 2; k++)
-                            {
-                                ColorList.Add(0);
-                            }
-                            ColorList.Add(2);
-                            i += 2;
-                            continue;
+                            ColorList.Add(0);
                         }
+                        ColorList.Add(2);
+                        i += 2;
+                        continue;
+
                     }
                 }
-                ColorList.Add(0);
-
                 ////Rule 3:
                 count = 0;
                 if (i < ColumnData.Count - 4)
@@ -135,33 +132,54 @@ namespace SPC_Chart_Generator
                     if (ColumnData[i + 4] < zone1_lower || ColumnData[i + 4] > zone1_upper) count++;
                     if (count <= 4)
                     {
-                        if ((ColumnData[i] >= mean && ColumnData[i + 1] >= mean && ColumnData[i + 2] >= mean && ColumnData[i + 3] >= mean && ColumnData[i + 4] >= mean) ||
-                           (ColumnData[i] <= mean && ColumnData[i + 1] <= mean && ColumnData[i + 2] <= mean && ColumnData[i + 3] <= mean && ColumnData[i + 4] <= mean))
+                        for (int k = 0; k < 4; k++)
                         {
-                            for (int k = 0; k < 4; k++)
-                            {
-                                ColorList.Add(0);
-                            }
-                            ColorList.Add(3);
-                            i += 4;
-                            continue;
+                            ColorList.Add(0);
                         }
+                        ColorList.Add(3);
+                        i += 4;
+                        continue;
+
                     }
 
                 }
+                ////Rule 4:
+                count = 0;
+                if (i < ColumnData.Count - 7)
+                {
+                    List<float> TempList = new List<float>();
+                    for (int k = 0; k <= 7; k++)
+                    {
+                        TempList.Add(ColumnData[k]);
+                    }
+                    bool AllGreater = TempList.All(p => p > mean);
+                    bool AllLesser = TempList.All(p => p < mean);
+                    if (AllGreater || AllLesser)
+                    {
+                        for (int k = 0; k < ColumnData.Count - 7; k++)
+                        {
+                            ColorList.Add(0);
+                        }
+                        ColorList.Add(4);
+                        i += 7;
+                        continue;
+                    }
+                }
+                //Add 1 entry if no rule broken
+                ColorList.Add(0);
             }
 
-            for (int i = 0; i < ColumnData.Count; i++)
-            {
-                PrintItem(ColumnData[i]);
-                PrintItem(ColorList[i]);
-                PrintItem(zone3_lower);
-                PrintItem(zone3_upper);
-                PrintItem(LCL);
-                PrintItem(UCL);
-                PrintItem("---------");
-            }
-            return null;
+            //for (int i = 0; i < ColumnData.Count; i++)
+            //{
+            //    PrintItem(ColumnData[i]);
+            //    PrintItem(ColorList[i]);
+            //    PrintItem(zone3_lower);
+            //    PrintItem(zone3_upper);
+            //    PrintItem(LCL);
+            //    PrintItem(UCL);
+            //    PrintItem("---------");
+            //}
+            return ColorList;
 
         }
         
