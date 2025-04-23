@@ -1,9 +1,10 @@
 using System.Xml.Linq;
 using System.Diagnostics;
-using System.Windows.Forms.DataVisualization.Charting;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
 using System.Drawing;
+
+using System.IO;
 namespace SPC_Chart_Generator
 {
     public partial class SPCChart : Form
@@ -15,18 +16,26 @@ namespace SPC_Chart_Generator
 
             this.WindowState = FormWindowState.Maximized;  
             this.FormBorderStyle = FormBorderStyle.Sizable; 
-            this.MaximizeBox = true; 
+            this.MaximizeBox = true;
+            var UserData = new DataPreparation(@"C:\Users\darkm\OneDrive\Desktop\test_data\random_data.csv");
+            var Table = new MakeTable(DataTable,UserData.UserData);
+            var NumericalData = UserData.NumericDataSummary;
+            var NumericStatTabl = new MakeTable(NumericStatTable, NumericalData);
+            var NonNumericalData = UserData.NonNumericDataSummary;
+            var NonNumericStatTabl = new MakeTable(NonNumericStatTable, NonNumericalData);
+            UserData.SortData();
+            Table.UpdateTable(UserData.UserData);
 
-            List<string> header = new List<string> { "id", "col1", "col2", "col3", "col4", "col5" };
-            var spc = new MakeSPC();
-            UserData = GenerateUserData();
-            var result = spc.InitializeSPC(header, UserData); //Return  Key: Column Name, Value: list of value and list of color
-            var ColumnStatistic  = spc.GetStatistics();
-            var Statistics = ColumnStatistic["col2"];
-            var XData = result["id"].Item1;
-            var YData = result["col2"].Item1;
-            var ColorData = result["col2"].Item2;
-            var chart = new PlotSPC(SPCPlot, Statistics, XData,YData,ColorData);
+            //List<string> header = new List<string> { "id", "col1", "col2", "col3", "col4", "col5" };
+            //var spc = new MakeSPC();
+            //UserData = GenerateUserData();
+            //var result = spc.InitializeSPC(header, UserData); //Return  Key: Column Name, Value: list of value and list of color
+            //var ColumnStatistic  = spc.GetStatistics();
+            //var Statistics = ColumnStatistic["col2"];
+            //var XData = result["id"].Item1;
+            //var YData = result["col2"].Item1;
+            //var ColorData = result["col2"].Item2;
+            //var chart = new PlotSPC(SPCPlot, Statistics, XData,YData,ColorData);
             #region PLOT
             //string SeriesName = "col1";
             //ChartArea chartArea = SPCPlot.ChartAreas[0];
