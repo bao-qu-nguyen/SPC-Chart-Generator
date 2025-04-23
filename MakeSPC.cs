@@ -53,8 +53,8 @@ namespace SPC_Chart_Generator
                 sum = 0;
                 min = UserData[0][i];
                 max = UserData[0][i];
-
                 float variance = 0;
+
                 for (int j = 0; j < RowCount; j++) 
                 { 
                     sum += UserData[j][i];
@@ -79,19 +79,26 @@ namespace SPC_Chart_Generator
             }
             return 0;
         }
-
+        public Dictionary<string, Dictionary<string, float>> GetStatistics()
+        {
+            if(StatsData == null ||  StatsData.Count == 0)
+            {
+                return null;
+            }
+            return StatsData;
+        }
         private List<int>?GetSPCColors(Dictionary<string,float> ColumnStat, List<float> ColumnData)
         {
             float mean = ColumnStat["Mean"];
             float std = ColumnStat["STD"];
-            float zone1_lower = -1 * std;
-            float zone1_upper =  std;
-            float zone2_lower = -2 * std;
-            float zone2_upper = 2*std;
-            float zone3_lower = -3 * std;
-            float zone3_upper = 3*std;
-            float LCL = mean+zone3_lower;
-            float UCL = mean+zone3_upper;
+            float zone1_lower = mean -1 * std;
+            float zone1_upper = mean + std;
+            float zone2_lower = mean + -2 * std;
+            float zone2_upper = mean + 2 *std;
+            float zone3_lower = mean + -3 * std;
+            float zone3_upper = mean + 3 *std;
+            float LCL = zone3_lower;
+            float UCL = zone3_upper;
             List<int> ColorList = new List<int>();
             for (int i = 0; i < ColumnData.Count; i++)
             {
@@ -108,7 +115,7 @@ namespace SPC_Chart_Generator
                     if (ColumnData[i] < zone2_lower || ColumnData[i] > zone2_upper) count++;
                     if (ColumnData[i + 1] < zone2_lower || ColumnData[i + 1] > zone2_upper) count++;
                     if (ColumnData[i + 2] < zone2_lower || ColumnData[i + 2] > zone2_upper) count++;
-                    if (count <= 2)
+                    if (count >= 2)
                     {
 
                         for (int k = 0; k < 2; k++)
@@ -130,7 +137,7 @@ namespace SPC_Chart_Generator
                     if (ColumnData[i + 2] < zone1_lower || ColumnData[i + 2] > zone1_upper) count++;
                     if (ColumnData[i + 3] < zone1_lower || ColumnData[i + 3] > zone1_upper) count++;
                     if (ColumnData[i + 4] < zone1_lower || ColumnData[i + 4] > zone1_upper) count++;
-                    if (count <= 4)
+                    if (count >= 4)
                     {
                         for (int k = 0; k < 4; k++)
                         {
@@ -169,23 +176,8 @@ namespace SPC_Chart_Generator
                 ColorList.Add(0);
             }
 
-            //for (int i = 0; i < ColumnData.Count; i++)
-            //{
-            //    PrintItem(ColumnData[i]);
-            //    PrintItem(ColorList[i]);
-            //    PrintItem(zone3_lower);
-            //    PrintItem(zone3_upper);
-            //    PrintItem(LCL);
-            //    PrintItem(UCL);
-            //    PrintItem("---------");
-            //}
             return ColorList;
 
-        }
-        
-        private void PrintItem<T>(T PrintValue)
-        {
-            System.Diagnostics.Debug.WriteLine(PrintValue);
         }
     };
 

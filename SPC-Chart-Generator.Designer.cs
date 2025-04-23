@@ -31,42 +31,44 @@
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            SPC_Chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            ((System.ComponentModel.ISupportInitialize)SPC_Chart).BeginInit();
+            SPCPlot = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            ((System.ComponentModel.ISupportInitialize)SPCPlot).BeginInit();
             SuspendLayout();
             // 
-            // SPC_Chart
+            // SPCPlot
             // 
             chartArea1.Name = "ChartArea1";
-            SPC_Chart.ChartAreas.Add(chartArea1);
+            SPCPlot.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
-            SPC_Chart.Legends.Add(legend1);
-            SPC_Chart.Location = new Point(2, 12);
-            SPC_Chart.Name = "SPC_Chart";
+            SPCPlot.Legends.Add(legend1);
+            SPCPlot.Location = new Point(12, 13);
+            SPCPlot.Margin = new Padding(3, 4, 3, 4);
+            SPCPlot.Name = "SPCPlot";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series1.Legend = "Legend1";
             series1.Name = "Series1";
-            SPC_Chart.Series.Add(series1);
-            SPC_Chart.Size = new Size(383, 210);
-            SPC_Chart.TabIndex = 0;
-            SPC_Chart.Text = "chart1";
+            SPCPlot.Series.Add(series1);
+            SPCPlot.Size = new Size(908, 591);
+            SPCPlot.TabIndex = 0;
+            SPCPlot.Text = "SPC Plot";
             // 
             // SPCChart
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Controls.Add(SPC_Chart);
+            ClientSize = new Size(914, 600);
+            Controls.Add(SPCPlot);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "SPCChart";
             Text = "SPC Chart";
-            ((System.ComponentModel.ISupportInitialize)SPC_Chart).EndInit();
+            ((System.ComponentModel.ISupportInitialize)SPCPlot).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
 
-        private System.Windows.Forms.DataVisualization.Charting.Chart SPC_Chart;
+        private System.Windows.Forms.DataVisualization.Charting.Chart SPCPlot;
     }
 }
