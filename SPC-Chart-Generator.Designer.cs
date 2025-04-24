@@ -31,9 +31,14 @@
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             SPCPlot = new System.Windows.Forms.DataVisualization.Charting.Chart();
             MainTab = new TabControl();
             DataPreparationTab = new TabPage();
+            DataPrepColSelection = new ComboBox();
+            DataPrepChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             NonNumericStatTable = new DataGridView();
             NumericStatTable = new DataGridView();
             DataTable = new DataGridView();
@@ -41,6 +46,7 @@
             ((System.ComponentModel.ISupportInitialize)SPCPlot).BeginInit();
             MainTab.SuspendLayout();
             DataPreparationTab.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)DataPrepChart).BeginInit();
             ((System.ComponentModel.ISupportInitialize)NonNumericStatTable).BeginInit();
             ((System.ComponentModel.ISupportInitialize)NumericStatTable).BeginInit();
             ((System.ComponentModel.ISupportInitialize)DataTable).BeginInit();
@@ -78,6 +84,8 @@
             // 
             // DataPreparationTab
             // 
+            DataPreparationTab.Controls.Add(DataPrepColSelection);
+            DataPreparationTab.Controls.Add(DataPrepChart);
             DataPreparationTab.Controls.Add(NonNumericStatTable);
             DataPreparationTab.Controls.Add(NumericStatTable);
             DataPreparationTab.Controls.Add(DataTable);
@@ -89,16 +97,42 @@
             DataPreparationTab.Text = "Data Preparation";
             DataPreparationTab.UseVisualStyleBackColor = true;
             // 
+            // DataPrepColSelection
+            // 
+            DataPrepColSelection.FormattingEnabled = true;
+            DataPrepColSelection.Location = new Point(545, 24);
+            DataPrepColSelection.Name = "DataPrepColSelection";
+            DataPrepColSelection.Size = new Size(151, 28);
+            DataPrepColSelection.TabIndex = 4;
+            DataPrepColSelection.SelectedIndexChanged += DataPrepColSelection_SelectedIndexChanged;
+            // 
+            // DataPrepChart
+            // 
+            chartArea2.Name = "ChartArea1";
+            DataPrepChart.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            DataPrepChart.Legends.Add(legend2);
+            DataPrepChart.Location = new Point(545, 72);
+            DataPrepChart.Name = "DataPrepChart";
+            DataPrepChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.SeaGreen;
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            DataPrepChart.Series.Add(series2);
+            DataPrepChart.Size = new Size(635, 430);
+            DataPrepChart.TabIndex = 3;
+            DataPrepChart.Text = "RawData";
+            // 
             // NonNumericStatTable
             // 
             NonNumericStatTable.AllowUserToAddRows = false;
             NonNumericStatTable.AllowUserToDeleteRows = false;
             NonNumericStatTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            NonNumericStatTable.Location = new Point(688, 220);
+            NonNumericStatTable.Location = new Point(8, 300);
             NonNumericStatTable.Name = "NonNumericStatTable";
             NonNumericStatTable.RowHeadersWidth = 51;
             NonNumericStatTable.ShowEditingIcon = false;
-            NonNumericStatTable.Size = new Size(487, 188);
+            NonNumericStatTable.Size = new Size(485, 188);
             NonNumericStatTable.TabIndex = 2;
             // 
             // NumericStatTable
@@ -107,10 +141,10 @@
             NumericStatTable.AllowUserToDeleteRows = false;
             NumericStatTable.AllowUserToOrderColumns = true;
             NumericStatTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            NumericStatTable.Location = new Point(688, 6);
+            NumericStatTable.Location = new Point(8, 494);
             NumericStatTable.Name = "NumericStatTable";
             NumericStatTable.RowHeadersWidth = 51;
-            NumericStatTable.Size = new Size(762, 188);
+            NumericStatTable.Size = new Size(485, 188);
             NumericStatTable.TabIndex = 1;
             // 
             // DataTable
@@ -120,7 +154,7 @@
             DataTable.Location = new Point(8, 6);
             DataTable.Name = "DataTable";
             DataTable.RowHeadersWidth = 51;
-            DataTable.Size = new Size(665, 402);
+            DataTable.Size = new Size(485, 301);
             DataTable.TabIndex = 0;
             // 
             // SPCTab
@@ -146,6 +180,7 @@
             ((System.ComponentModel.ISupportInitialize)SPCPlot).EndInit();
             MainTab.ResumeLayout(false);
             DataPreparationTab.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)DataPrepChart).EndInit();
             ((System.ComponentModel.ISupportInitialize)NonNumericStatTable).EndInit();
             ((System.ComponentModel.ISupportInitialize)NumericStatTable).EndInit();
             ((System.ComponentModel.ISupportInitialize)DataTable).EndInit();
@@ -164,5 +199,7 @@
         private DataGridView dataGridView2;
         private DataGridView NumericStatTable;
         private DataGridView NonNumericStatTable;
+        private System.Windows.Forms.DataVisualization.Charting.Chart DataPrepChart;
+        private ComboBox DataPrepColSelection;
     }
 }

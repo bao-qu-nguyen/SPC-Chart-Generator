@@ -9,22 +9,29 @@ namespace SPC_Chart_Generator
 {
     public partial class SPCChart : Form
     {
-        public List<List<float>> UserData { get; set; }
+        public List<List<string>> UserData { get; set; }
+        DataPreparation data;
         public SPCChart()
         {
             InitializeComponent();
 
-            this.WindowState = FormWindowState.Maximized;  
-            this.FormBorderStyle = FormBorderStyle.Sizable; 
+            this.WindowState = FormWindowState.Maximized;
+            this.FormBorderStyle = FormBorderStyle.Sizable;
             this.MaximizeBox = true;
-            var UserData = new DataPreparation(@"C:\Users\darkm\OneDrive\Desktop\test_data\random_data.csv");
-            var Table = new MakeTable(DataTable,UserData.UserData);
-            var NumericalData = UserData.NumericDataSummary;
+            //var UserData = new DataPreparation(@"C:\Users\darkm\OneDrive\Desktop\test_data\random_data.csv");
+            data = new DataPreparation();
+            UserData = data.GetData(@"C:\Users\darkm\OneDrive\Desktop\test_data\random_data.csv");
+            var ColumnHeader = data.ColumnHeader.Skip(1);
+            DataPrepColSelection.Items.Clear();
+            DataPrepColSelection.Items.AddRange(ColumnHeader.ToArray());
+            
+            var Table = new MakeTable(DataTable, data.UserData);
+            var NumericalData = data.NumericDataSummary;
             var NumericStatTabl = new MakeTable(NumericStatTable, NumericalData);
-            var NonNumericalData = UserData.NonNumericDataSummary;
+            var NonNumericalData = data.NonNumericDataSummary;
             var NonNumericStatTabl = new MakeTable(NonNumericStatTable, NonNumericalData);
-            UserData.SortData();
-            Table.UpdateTable(UserData.UserData);
+            data.SortData();
+            Table.UpdateTable(data.UserData);
 
             //List<string> header = new List<string> { "id", "col1", "col2", "col3", "col4", "col5" };
             //var spc = new MakeSPC();
@@ -244,6 +251,14 @@ namespace SPC_Chart_Generator
             return userData;
         }
 
-
+        private void DataPrepColSelection_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (DataPrepColSelection.SelectedIndex != -1)
+            {
+                string selectedValue = DataPrepColSelection.SelectedItem.ToString();
+                Debug.WriteLine(selectedValue);
+                data.PlotData(DataPrepChart, selectedValue);
+            }
+        }
     }
 }

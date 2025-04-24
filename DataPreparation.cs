@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.DataVisualization.Charting;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -14,16 +15,9 @@ namespace SPC_Chart_Generator
     {
         string FilePath;
         public List<List<string>> UserData = new List<List<string>>();
-        //public Dictionary<string, Dictionary<string, float>> NumericDataSummary = new Dictionary<string, Dictionary<string, float>> ();
         public List<List<string>> NumericDataSummary;
         public List<List<string>> NonNumericDataSummary;
-        //public Dictionary<string, Dictionary<string, float>> NonNumericDataSummary = new Dictionary<string, Dictionary<string, float>>();
-        public DataPreparation(string path) {
-
-            FilePath = path;
-            GetData(path);
-
-        }
+        public List<string> ColumnHeader;
 
         public List<List<string>> GetData(string path)
         {
@@ -42,12 +36,14 @@ namespace SPC_Chart_Generator
                 }
             }
             DataSummary();
+            ColumnHeader = new List<string>(UserData[0]);
             return UserData;
         }
         public void SortData(string ByColumn = "")
         {
             //Default will sort by the first column
             var header = UserData[0];
+            
             int columnIndex = header.IndexOf(ByColumn);
             if (columnIndex < 0) { 
                 columnIndex  = 0;
@@ -57,6 +53,76 @@ namespace SPC_Chart_Generator
                             .ToList();
             UserData = new List<List<string>> { header };
             UserData.AddRange(sortedData);
+        }
+
+        public void PlotData(Chart DataChart, string ColumnSelection)
+        {
+            Series series = new Series(ColumnSelection);
+            DataChart.Series.Clear();
+            DataChart.ChartAreas.Clear();
+            ChartArea chartArea = new ChartArea("MainArea");
+  
+            DataChart.ChartAreas.Add(chartArea);
+
+            var header = UserData[0].Skip(1).ToList();
+            int ColumnIndex = header.IndexOf(ColumnSelection) + 1;
+
+            if (ColumnIndex < 0)
+            {
+                Debug.WriteLine($"Column '{ColumnSelection}' not found.");
+                return;
+            }
+
+            var ColumnData = UserData
+                .Skip(1)
+                .Where(row => row.Count > ColumnIndex)
+                .Select(row => row[ColumnIndex])
+                .Where(val => !string.IsNullOrWhiteSpace(val))
+                .ToList();
+
+            var ColumnType = DetectColumnDataType(ColumnData);
+
+            if (ColumnType == typeof(float) || ColumnType == typeof(double) || ColumnType == typeof(int))
+            {
+                var numericData = ColumnData.Select(float.Parse).ToList();
+                series.ChartType = SeriesChartType.Line;
+                series.MarkerStyle = MarkerStyle.Circle;
+                series.MarkerSize = 6;
+
+                for (int i = 0; i < numericData.Count; i++)
+                {
+                    series.Points.AddXY(i, numericData[i]);
+                }
+
+                DataChart.ChartAreas[0].AxisX.Title = "Index";
+                DataChart.ChartAreas[0].AxisY.Title = ColumnSelection;
+            }
+            else
+            {
+                var CategoryCounts = ColumnData
+                        .Where(c => !string.IsNullOrWhiteSpace(c))
+                        .GroupBy(c => c)
+                        .ToDictionary(g => g.Key, g => g.Count());
+                
+                series.ChartType = SeriesChartType.Column;
+                series["PointWidth"] = "0.5";
+                series.XValueType = ChartValueType.String;
+                int i = 1;
+                foreach (var key in CategoryCounts)
+                {
+                    Debug.WriteLine(key.Key);
+                    Debug.WriteLine(key.Value);
+                    series.Points.AddXY(key.Key, key.Value);
+                    i++;
+                }
+                DataChart.ChartAreas[0].AxisX.Interval = 1; 
+                DataChart.ChartAreas[0].AxisX.IsLabelAutoFit = true;
+                DataChart.ChartAreas[0].AxisX.LabelStyle.Angle = 45; 
+                DataChart.ChartAreas[0].AxisX.Title = "Category";
+                DataChart.ChartAreas[0].AxisY.Title = "Count";
+            }
+
+            DataChart.Series.Add(series);
         }
 
         public void DataSummary()
