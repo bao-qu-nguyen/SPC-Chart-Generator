@@ -14,13 +14,16 @@ namespace SPC_Chart_Generator
     public class DataPreparation
     {
         string FilePath;
-        public List<List<string>> UserData = new List<List<string>>();
+        public List<List<string>> UserData;
+        private List<List<string>> UserDataUnModified ;
         public List<List<string>> NumericDataSummary;
         public List<List<string>> NonNumericDataSummary;
         public List<string> ColumnHeader;
+        public List<string> NumericalColumnHeader;
 
         public List<List<string>> GetData(string path)
         {
+            UserData = new List<List<string>>();
             using (StreamReader sr = File.OpenText(path))
             {
                 FilePath = path;
@@ -35,6 +38,8 @@ namespace SPC_Chart_Generator
                         );
                 }
             }
+
+            UserDataUnModified = UserData.Select(row => new List<string>(row)).ToList(); ;
             DataSummary();
             ColumnHeader = new List<string>(UserData[0]);
             return UserData;
@@ -60,8 +65,12 @@ namespace SPC_Chart_Generator
             Series series = new Series(ColumnSelection);
             DataChart.Series.Clear();
             DataChart.ChartAreas.Clear();
+            DataChart.Legends.Clear();
             ChartArea chartArea = new ChartArea("MainArea");
-  
+            Legend legend = new Legend();
+            legend.Enabled = false;
+            DataChart.Legends.Add(legend);
+
             DataChart.ChartAreas.Add(chartArea);
 
             var header = UserData[0].Skip(1).ToList();
@@ -96,6 +105,7 @@ namespace SPC_Chart_Generator
 
                 DataChart.ChartAreas[0].AxisX.Title = "Index";
                 DataChart.ChartAreas[0].AxisY.Title = ColumnSelection;
+                
             }
             else
             {
@@ -112,7 +122,7 @@ namespace SPC_Chart_Generator
                 {
                     Debug.WriteLine(key.Key);
                     Debug.WriteLine(key.Value);
-                    series.Points.AddXY(key.Key, key.Value);
+                    series.Points.AddXY(i, key.Value);
                     i++;
                 }
                 DataChart.ChartAreas[0].AxisX.Interval = 1; 
@@ -134,16 +144,23 @@ namespace SPC_Chart_Generator
             NonNumericDataSummary = new List<List<string>>();
             NonNumericDataSummary.Clear();
             NonNumericDataSummary.Add(new List<string> { "ColumnName", "NullCount", "TotalCount", "UniqueCount"});
+            NumericalColumnHeader = new List<string>();
             foreach (var column in header)
             {
                 int ColumnIndex = header.IndexOf(column);
                 int NullCount;
                 var ColumnData = UserData.Skip(1).Where(row => row.Count > ColumnIndex).Select(row => row[ColumnIndex]).ToList();
+                foreach (var row in ColumnData)
+                {
+                    string line = string.Join(", ", row);
+                    Debug.WriteLine(line);
+                }
                 var ColumnType = DetectColumnDataType(ColumnData);
                 if (ColumnType == typeof(float) || ColumnType == typeof(double) || ColumnType == typeof(int))
                 { 
-                    NullCount = ColumnData.Count(row => row == null);
+                    NullCount = ColumnData.Count(row => string.IsNullOrEmpty(row));
                     ColumnData = ColumnData.Where(value => !string.IsNullOrEmpty(value)).ToList();
+
                     List<float> ColumnDataConverted = ColumnData.ConvertAll(float.Parse);
                     float Mean = ColumnDataConverted.Average();
                     float Max = ColumnDataConverted.Max();
@@ -161,13 +178,7 @@ namespace SPC_Chart_Generator
                                                         Q2.ToString("F2"),
                                                         Q3.ToString("F2")
                                                     });
-
-                    
-                    foreach(var row in NumericDataSummary)
-                    {
-                        Debug.WriteLine(string.Join("|", row));
-                    }
-
+                    NumericalColumnHeader.Add(column);
                 }
                 if (ColumnType == typeof(string) || ColumnType == typeof(DateTime?))
                 {
@@ -176,20 +187,200 @@ namespace SPC_Chart_Generator
                     float TotalCount = ColumnData.Count - NullCount;
                     float UniqueCount = ColumnData.Distinct().Count();
                     NonNumericDataSummary.Add(new List<string> {column,NullCount.ToString("F0"),
-                        TotalCount.ToString("F0"),UniqueCount.ToString("F0") });
+                    TotalCount.ToString("F0"),UniqueCount.ToString("F0") });
                 }
-
-
             }
                                               
         }
         public void RemoveNullData()
         {
-
+            UserData = UserDataUnModified.Select(row => new List<string>(row)).ToList();
+            UserData = UserData.Where(row => row.All(cell => !string.IsNullOrWhiteSpace(cell)))
+                                .ToList();
+            DataSummary();
         }
-        public void FillNullData()
+        public void RevertData()
         {
+            UserData = UserDataUnModified.Select(row => new List<string>(row)).ToList();
+            DataSummary();
+            int userDataNullCount = CountNulls(UserData);
+            int userDataUnmodifiedNullCount = CountNulls(UserDataUnModified);
+        }
+        int CountNulls(List<List<string>> data)
+        {
+            return data.Skip(1)  // skip header
+                       .SelectMany(row => row)
+                       .Count(cell => string.IsNullOrWhiteSpace(cell));
+        }
+        public void FillNullData(string FillColumnWith)
+        {
+            UserData = UserDataUnModified.Select(row => new List<string>(row)).ToList();
+            var header = UserData[0];
+            
+            switch (FillColumnWith)
+            {
+                case "Mean":
+                    for (int col = 0; col < header.Count; col++)
+                    {
+                        var ColumnData = UserData.Skip(1)
+                            .Where(row => row.Count > col)
+                            .Select(row => row[col])
+                            .ToList();
 
+                        var ColumnType = DetectColumnDataType(ColumnData);
+
+                        if (ColumnType == typeof(float) || ColumnType == typeof(double) || ColumnType == typeof(int))
+                        {
+                            var validData = ColumnData
+                                .Where(val => !string.IsNullOrWhiteSpace(val))
+                                .Select(float.Parse)
+                                .ToList();
+
+                            if (validData.Count == 0) continue;
+
+                            float mean = validData.Average();
+
+                            foreach (var row in UserData.Skip(1))
+                            {
+                                if (row.Count > col && string.IsNullOrWhiteSpace(row[col]))
+                                {
+                                    row[col] = mean.ToString("F2");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var nonEmpty = ColumnData
+                                .Where(val => !string.IsNullOrWhiteSpace(val));
+
+                            if (!nonEmpty.Any()) continue;
+
+                            var mode = nonEmpty
+                                .GroupBy(val => val)
+                                .OrderByDescending(g => g.Count())
+                                .First()
+                                .Key;
+
+                            foreach (var row in UserData.Skip(1))
+                            {
+                                if (row.Count > col && string.IsNullOrWhiteSpace(row[col]))
+                                {
+                                    row[col] = mode;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case "Min":
+                    for (int col = 0; col < header.Count; col++)
+                    {
+                        var ColumnData = UserData.Skip(1)
+                            .Where(row => row.Count > col)
+                            .Select(row => row[col])
+                            .ToList();
+
+                        var ColumnType = DetectColumnDataType(ColumnData);
+
+                        if (ColumnType == typeof(float) || ColumnType == typeof(double) || ColumnType == typeof(int))
+                        {
+                            var validData = ColumnData
+                                .Where(val => !string.IsNullOrWhiteSpace(val))
+                                .Select(float.Parse)
+                                .ToList();
+
+                            if (validData.Count == 0) continue;
+
+                            float min = validData.Min();
+
+                            foreach (var row in UserData.Skip(1))
+                            {
+                                if (row.Count > col && string.IsNullOrWhiteSpace(row[col]))
+                                {
+                                    row[col] = min.ToString("F2");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var nonEmpty = ColumnData
+                                .Where(val => !string.IsNullOrWhiteSpace(val));
+
+                            if (!nonEmpty.Any()) continue;
+
+                            var leastFrequent = nonEmpty
+                                .GroupBy(val => val)
+                                .OrderBy(g => g.Count())  
+                                .ThenBy(g => g.Key)       
+                                .First()
+                                .Key;
+
+                            foreach (var row in UserData.Skip(1))
+                            {
+                                if (row.Count > col && string.IsNullOrWhiteSpace(row[col]))
+                                {
+                                    row[col] = leastFrequent;
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+                case "Max":
+                    for (int col = 0; col < header.Count; col++)
+                    {
+                        var ColumnData = UserData.Skip(1)
+                            .Where(row => row.Count > col)
+                            .Select(row => row[col])
+                            .ToList();
+
+                        var ColumnType = DetectColumnDataType(ColumnData);
+
+                        if (ColumnType == typeof(float) || ColumnType == typeof(double) || ColumnType == typeof(int))
+                        {
+                            var validData = ColumnData
+                                .Where(val => !string.IsNullOrWhiteSpace(val))
+                                .Select(float.Parse)
+                                .ToList();
+
+                            if (validData.Count == 0) continue;
+
+                            float max = validData.Max();
+
+                            foreach (var row in UserData.Skip(1))
+                            {
+                                if (row.Count > col && string.IsNullOrWhiteSpace(row[col]))
+                                {
+                                    row[col] = max.ToString("F2");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var nonEmpty = ColumnData
+                                .Where(val => !string.IsNullOrWhiteSpace(val));
+
+                            if (!nonEmpty.Any()) continue;
+
+                            var mode = nonEmpty
+                                .GroupBy(val => val)
+                                .OrderByDescending(g => g.Count())
+                                .First()
+                                .Key;
+
+                            foreach (var row in UserData.Skip(1))
+                            {
+                                if (row.Count > col && string.IsNullOrWhiteSpace(row[col]))
+                                {
+                                    row[col] = mode;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            DataSummary();
         }
         public static Type DetectColumnDataType(List<string> column, double threshold = 0.8)
         {

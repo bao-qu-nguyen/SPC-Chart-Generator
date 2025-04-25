@@ -22,7 +22,7 @@ namespace SPC_Chart_Generator
             UserData = InputData;
             ColumnNames = HeaderData;
             GetColumnStatistic();
-            for (int i = 0; i < ColumnNames.Count -1; i++)
+            for (int i = 0; i < ColumnNames.Count; i++)
             {
                 var column = ColumnNames[i];
                 List<float> SingleColumnData = new List<float>();
