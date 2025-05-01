@@ -153,7 +153,6 @@ namespace SPC_Chart_Generator
                 foreach (var row in ColumnData)
                 {
                     string line = string.Join(", ", row);
-                    Debug.WriteLine(line);
                 }
                 var ColumnType = DetectColumnDataType(ColumnData);
                 if (ColumnType == typeof(float) || ColumnType == typeof(double) || ColumnType == typeof(int))

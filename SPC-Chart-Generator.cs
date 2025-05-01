@@ -17,9 +17,11 @@ namespace SPC_Chart_Generator
         DataPreparation data;
         MakeTable Table, NumericStatTabl, NonNumericStatTabl;
         MakeSPC SPC;
+        LLMInterface ModelChat;
         List<string> SPCHeader;
         string FilePath;
         string FilePathDefault = @"C:\Users\darkm\source\repos\SPC-Chart-Generator\data\random_data.csv";
+        string ModelURL = "http://10.0.0.237:1234/v1/chat/completions";
         public SPCChart()
         {
             InitializeComponent();
@@ -55,8 +57,20 @@ namespace SPC_Chart_Generator
             SPCColumnComboBox.Items.Clear();
             SPCColumnComboBox.Items.AddRange(SPCHeader.ToArray());
             SPC = new MakeSPC();
-        }
+            Debug.WriteLine(string.Join(", ", data.UserData.SelectMany(innerList => innerList)));
 
+            ModelChat = new LLMInterface();
+            InitializeApp();
+
+        }
+        private async void InitializeApp()
+        {
+            await ModelChat.PingServer(ModelURL);
+        }
+        public async Task<string> SendModelMessage(string message)
+        {
+            return await ModelChat.SendMessageToModel(message);
+        }
         public static List<List<float>> GenerateUserData(int rowCount = 30, int columnCount = 5)
         {
             var rand = new Random(42);
@@ -194,20 +208,20 @@ namespace SPC_Chart_Generator
                 var chart = new PlotSPC(SPCPlot, Statistics, XData, YData, ColorData);
             }
         }
-
+        #region GetDataClick
         private void btnGetData_Click(object sender, EventArgs e)
         {
             OpenFileDialog File = new OpenFileDialog();
             File.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
             File.Title = "Select a file";
-            if (File.ShowDialog() == DialogResult.OK) 
+            if (File.ShowDialog() == DialogResult.OK)
             {
                 FilePath = File.FileName;
                 Debug.WriteLine(FilePath);
                 try
                 {
                     UserData = data.GetData(@$"{FilePath}");
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -229,6 +243,43 @@ namespace SPC_Chart_Generator
                     SPCColumnComboBox.Items.Clear();
                     SPCColumnComboBox.Items.AddRange(SPCHeader.ToArray());
                 }
+            }
+
+        }
+        #endregion
+
+
+        private async void btnChatEnter_Click(object sender, EventArgs e)
+        {
+            if (UserChatBox.Text.Length > 0) {
+                string UserMessage = UserChatBox.Text.Substring(0, UserChatBox.Text.Length);
+                MainChatBox.SelectionAlignment = HorizontalAlignment.Right;
+                MainChatBox.SelectionFont = new Font(MainChatBox.Font, FontStyle.Bold);
+                MainChatBox.AppendText("User: ");
+                MainChatBox.SelectionFont = MainChatBox.Font;
+                MainChatBox.AppendText( UserMessage + Environment.NewLine);
+                MainChatBox.ScrollToCaret();
+                if(ModelChat.ModelConnected == 1)
+                {
+                    string ModelMessage = await SendModelMessage(UserMessage);
+                    if (ModelMessage.Length > 0)
+                    {
+                        ModelMessage = ModelMessage.Replace(@"\boxed{4}", "[4]");
+                        ModelMessage = ModelMessage.Replace(@"$\boxed{4}$", "[4]");
+                        MainChatBox.SelectionAlignment = HorizontalAlignment.Left;
+                        MainChatBox.SelectionFont = new Font(MainChatBox.Font, FontStyle.Bold);
+                        MainChatBox.AppendText("Model: ");
+                        MainChatBox.SelectionFont = MainChatBox.Font;
+                        MainChatBox.AppendText(ModelMessage + Environment.NewLine);
+                        MainChatBox.ScrollToCaret();
+                    }
+                }
+                else
+                {
+                    MainChatBox.SelectionAlignment = HorizontalAlignment.Left;
+                    MainChatBox.AppendText("Model not connected" + Environment.NewLine);
+                }
+
             }
 
         }

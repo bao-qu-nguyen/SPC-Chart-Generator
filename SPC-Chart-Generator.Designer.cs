@@ -57,11 +57,16 @@
             DataPrepChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             tableLayoutPanel1 = new TableLayoutPanel();
             DataTable = new DataGridView();
+            tableLayoutPanel7 = new TableLayoutPanel();
+            tableLayoutPanel8 = new TableLayoutPanel();
+            UserChatBox = new TextBox();
+            btnChatEnter = new Button();
+            MainChatBox = new RichTextBox();
             SPCTab = new TabPage();
-            SPCColumnComboBox = new ComboBox();
-            groupBox5 = new GroupBox();
             tableLayoutPanel5 = new TableLayoutPanel();
             tableLayoutPanel6 = new TableLayoutPanel();
+            groupBox5 = new GroupBox();
+            SPCColumnComboBox = new ComboBox();
             ((System.ComponentModel.ISupportInitialize)SPCPlot).BeginInit();
             MainTab.SuspendLayout();
             DataPreparationTab.SuspendLayout();
@@ -77,10 +82,12 @@
             ((System.ComponentModel.ISupportInitialize)DataPrepChart).BeginInit();
             tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)DataTable).BeginInit();
+            tableLayoutPanel7.SuspendLayout();
+            tableLayoutPanel8.SuspendLayout();
             SPCTab.SuspendLayout();
-            groupBox5.SuspendLayout();
             tableLayoutPanel5.SuspendLayout();
             tableLayoutPanel6.SuspendLayout();
+            groupBox5.SuspendLayout();
             SuspendLayout();
             // 
             // SPCPlot
@@ -195,7 +202,6 @@
             NullComboBox.Name = "NullComboBox";
             NullComboBox.Size = new Size(151, 28);
             NullComboBox.TabIndex = 5;
-            NullComboBox.Visible = false;
             NullComboBox.SelectedIndexChanged += NullComboBox_SelectedIndexChanged;
             NullComboBox.ValueMemberChanged += DataPrepColSelection_SelectedIndexChanged;
             // 
@@ -360,15 +366,16 @@
             // 
             // tableLayoutPanel1
             // 
-            tableLayoutPanel1.ColumnCount = 1;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.ColumnCount = 2;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50.18396F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 49.81604F));
             tableLayoutPanel1.Controls.Add(DataTable, 0, 0);
+            tableLayoutPanel1.Controls.Add(tableLayoutPanel7, 1, 0);
             tableLayoutPanel1.Dock = DockStyle.Bottom;
             tableLayoutPanel1.Location = new Point(3, 552);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 1;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanel1.Size = new Size(1359, 255);
             tableLayoutPanel1.TabIndex = 6;
             // 
@@ -381,8 +388,65 @@
             DataTable.Location = new Point(3, 3);
             DataTable.Name = "DataTable";
             DataTable.RowHeadersWidth = 51;
-            DataTable.Size = new Size(1353, 249);
+            DataTable.Size = new Size(676, 249);
             DataTable.TabIndex = 0;
+            // 
+            // tableLayoutPanel7
+            // 
+            tableLayoutPanel7.ColumnCount = 1;
+            tableLayoutPanel7.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel7.Controls.Add(tableLayoutPanel8, 0, 1);
+            tableLayoutPanel7.Controls.Add(MainChatBox, 0, 0);
+            tableLayoutPanel7.Dock = DockStyle.Fill;
+            tableLayoutPanel7.Location = new Point(685, 3);
+            tableLayoutPanel7.Name = "tableLayoutPanel7";
+            tableLayoutPanel7.RowCount = 2;
+            tableLayoutPanel7.RowStyles.Add(new RowStyle(SizeType.Percent, 83.9357452F));
+            tableLayoutPanel7.RowStyles.Add(new RowStyle(SizeType.Percent, 16.0642567F));
+            tableLayoutPanel7.Size = new Size(671, 249);
+            tableLayoutPanel7.TabIndex = 1;
+            // 
+            // tableLayoutPanel8
+            // 
+            tableLayoutPanel8.ColumnCount = 2;
+            tableLayoutPanel8.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 85.86466F));
+            tableLayoutPanel8.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 14.1353388F));
+            tableLayoutPanel8.Controls.Add(UserChatBox, 0, 0);
+            tableLayoutPanel8.Controls.Add(btnChatEnter, 1, 0);
+            tableLayoutPanel8.Dock = DockStyle.Fill;
+            tableLayoutPanel8.Location = new Point(3, 212);
+            tableLayoutPanel8.Name = "tableLayoutPanel8";
+            tableLayoutPanel8.RowCount = 1;
+            tableLayoutPanel8.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel8.Size = new Size(665, 34);
+            tableLayoutPanel8.TabIndex = 0;
+            // 
+            // UserChatBox
+            // 
+            UserChatBox.Dock = DockStyle.Fill;
+            UserChatBox.Location = new Point(3, 3);
+            UserChatBox.Name = "UserChatBox";
+            UserChatBox.Size = new Size(565, 27);
+            UserChatBox.TabIndex = 0;
+            // 
+            // btnChatEnter
+            // 
+            btnChatEnter.Location = new Point(574, 3);
+            btnChatEnter.Name = "btnChatEnter";
+            btnChatEnter.Size = new Size(88, 28);
+            btnChatEnter.TabIndex = 1;
+            btnChatEnter.Text = "Enter";
+            btnChatEnter.UseVisualStyleBackColor = true;
+            btnChatEnter.Click += btnChatEnter_Click;
+            // 
+            // MainChatBox
+            // 
+            MainChatBox.Dock = DockStyle.Fill;
+            MainChatBox.Location = new Point(3, 3);
+            MainChatBox.Name = "MainChatBox";
+            MainChatBox.Size = new Size(665, 203);
+            MainChatBox.TabIndex = 1;
+            MainChatBox.Text = "";
             // 
             // SPCTab
             // 
@@ -394,28 +458,6 @@
             SPCTab.TabIndex = 1;
             SPCTab.Text = "SPC";
             SPCTab.UseVisualStyleBackColor = true;
-            // 
-            // SPCColumnComboBox
-            // 
-            SPCColumnComboBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            SPCColumnComboBox.FormattingEnabled = true;
-            SPCColumnComboBox.Location = new Point(6, 39);
-            SPCColumnComboBox.Name = "SPCColumnComboBox";
-            SPCColumnComboBox.Size = new Size(209, 28);
-            SPCColumnComboBox.TabIndex = 1;
-            SPCColumnComboBox.SelectedIndexChanged += SPCColumnComboBox_SelectedIndexChanged;
-            // 
-            // groupBox5
-            // 
-            groupBox5.Controls.Add(SPCColumnComboBox);
-            groupBox5.Dock = DockStyle.Fill;
-            groupBox5.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            groupBox5.Location = new Point(3, 3);
-            groupBox5.Name = "groupBox5";
-            groupBox5.Size = new Size(287, 170);
-            groupBox5.TabIndex = 2;
-            groupBox5.TabStop = false;
-            groupBox5.Text = "SPC Column Selection";
             // 
             // tableLayoutPanel5
             // 
@@ -446,6 +488,28 @@
             tableLayoutPanel6.Size = new Size(293, 798);
             tableLayoutPanel6.TabIndex = 1;
             // 
+            // groupBox5
+            // 
+            groupBox5.Controls.Add(SPCColumnComboBox);
+            groupBox5.Dock = DockStyle.Fill;
+            groupBox5.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            groupBox5.Location = new Point(3, 3);
+            groupBox5.Name = "groupBox5";
+            groupBox5.Size = new Size(287, 170);
+            groupBox5.TabIndex = 2;
+            groupBox5.TabStop = false;
+            groupBox5.Text = "SPC Column Selection";
+            // 
+            // SPCColumnComboBox
+            // 
+            SPCColumnComboBox.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            SPCColumnComboBox.FormattingEnabled = true;
+            SPCColumnComboBox.Location = new Point(6, 39);
+            SPCColumnComboBox.Name = "SPCColumnComboBox";
+            SPCColumnComboBox.Size = new Size(209, 28);
+            SPCColumnComboBox.TabIndex = 1;
+            SPCColumnComboBox.SelectedIndexChanged += SPCColumnComboBox_SelectedIndexChanged;
+            // 
             // SPCChart
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -471,10 +535,13 @@
             ((System.ComponentModel.ISupportInitialize)DataPrepChart).EndInit();
             tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)DataTable).EndInit();
+            tableLayoutPanel7.ResumeLayout(false);
+            tableLayoutPanel8.ResumeLayout(false);
+            tableLayoutPanel8.PerformLayout();
             SPCTab.ResumeLayout(false);
-            groupBox5.ResumeLayout(false);
             tableLayoutPanel5.ResumeLayout(false);
             tableLayoutPanel6.ResumeLayout(false);
+            groupBox5.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -510,5 +577,10 @@
         private TableLayoutPanel tableLayoutPanel5;
         private TableLayoutPanel tableLayoutPanel6;
         private GroupBox groupBox5;
+        private TableLayoutPanel tableLayoutPanel7;
+        private TableLayoutPanel tableLayoutPanel8;
+        private TextBox UserChatBox;
+        private Button btnChatEnter;
+        private RichTextBox MainChatBox;
     }
 }
